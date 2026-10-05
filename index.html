@@ -3,670 +3,826 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scoundrel: Dungeon Crawler RPG (Full Expanded Edition)</title>
+  <title>Dungeon Scoundrel RPG</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #e0e0e0;
-      --accent-color: #3182ce;
-      --enemy-color: #e53e3e;
-      --weapon-color: #d69e2e;
-      --potion-color: #38a169;
-      --curse-color: #805ad5;
-      --shop-color: #ecc94b;
-      --cheat-color: #e53e3e;
-      --cloud-color: #4299e1;
-      --treasure-color: #ed8936;
-      --boss-color: #ff0055;
-      --border-color: #333;
-    }
-
-    * { box-sizing: border-box; }
-
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700&display=swap');
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0d14;
+      color: #e2e8f0;
+    }
+    
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
     }
 
-    .header-bar {
-      width: 100%;
-      max-width: 650px;
-      max-width: 650px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-      background: var(--card-bg);
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+    .card-glow-enemy:hover { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+    .card-glow-boss:hover { border-color: #dc2626; box-shadow: 0 0 20px rgba(220, 38, 38, 0.5); }
+    .card-glow-weapon:hover { border-color: #eab308; box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
+    .card-glow-shrine:hover { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+    .card-glow-curse:hover { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
+    .card-glow-chest:hover { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
     }
-
-    @media (min-width: 550px) {
-      .stats-panel { grid-template-columns: repeat(6, 1fr); }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #111827;
     }
-
-    .stat-box { text-align: center; }
-    .stat-label { font-size: 10px; opacity: 0.7; text-transform: uppercase; }
-    .stat-value { font-size: 13px; font-weight: bold; margin-top: 2px; }
-
-    .dungeon-grid {
-      width: 100%;
-      max-width: 650px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 3px;
     }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-2 md:p-6 select-none">
 
-    @media (max-width: 400px) {
-      .dungeon-grid { grid-template-columns: 1fr; }
-    }
-
-    .encounter-node {
-      background: var(--card-bg);
-      border: 2px solid var(--border-color);
-      border-radius: 10px;
-      padding: 14px;
-      min-height: 110px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .encounter-node:hover { transform: translateY(-2px); }
-    .node-enemy { border-color: var(--enemy-color); }
-    .node-weapon { border-color: var(--weapon-color); }
-    .node-shrine { border-color: var(--potion-color); }
-    .node-curse { border-color: var(--curse-color); }
-    .node-shop { border-color: var(--shop-color); }
-    .node-treasure { border-color: var(--treasure-color); }
-    .node-boss { border-color: var(--boss-color); background: #2a0813; }
-
-    .node-title { font-size: 15px; font-weight: bold; }
-    .node-desc { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-
-    .controls { display: flex; gap: 8px; margin-bottom: 16px; width: 100%; max-width: 650px; }
-    .controls .btn { flex: 1; padding: 12px; }
-
-    .class-select {
-      margin-bottom: 12px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-      max-width: 650px;
-    <h2 id="game-title" title="Click 5 times for Secret Code">Dungeon Scoundrel</h2>
-    <div style="display: flex; gap: 6px;">
-      <button class="btn btn-leaderboard" id="open-leaderboard-btn">Leaderboard</button>
-      <button class="btn btn-cloud" id="open-cloud-btn">Cloud Sync</button>
-    </div>
-  </div>
-
-  <div class="class-select">
-    <label for="hero-class" style="font-size: 13px;">Hero: </label>
-    <select id="hero-class">
-      <option value="Knight">Knight (+5 HP, Shield Heals +6)</option>
-      <option value="Rogue">Rogue (+10 Starting Gold, 2 Retreats)</option>
-      <option value="Sorcerer">Sorcerer (Dispels Cursed Fountains)</option>
-      <option value="Necromancer">Necromancer (Siphons 5 HP)</option>
-      <option value="Paladin">Paladin (+2 Armor, Holy Shield)</option>
-      <option value="Berserker">Berserker (Rage Blast Clears Node)</option>
-    </select>
-    <button class="btn" id="start-btn">New Run</button>
-  </div>
-
-  <div class="stats-panel">
-    <div class="stat-box"><div class="stat-label">Health</div><div class="stat-value" id="hp-val">20 / 20</div></div>
-    <div class="stat-box"><div class="stat-label">Level / XP</div><div class="stat-value" id="xp-val">Lvl 1 (0/10)</div></div>
-    <div class="stat-box"><div class="stat-label">Gold</div><div class="stat-value" id="gold-val">0</div></div>
-    <div class="stat-box"><div class="stat-label">Armor / Weapon</div><div class="stat-value" id="weapon-val">0 Arm / Unarmed</div></div>
-    <div class="stat-box"><div class="stat-label">Wave / Mode</div><div class="stat-value" id="floor-val">1 / Standard</div></div>
-    <div class="stat-box"><div class="stat-label">Skill</div><div class="stat-value" id="skill-val">Ready</div></div>
-  </div>
-
-  <div class="dungeon-grid" id="dungeon-room"></div>
-
-  <div class="controls">
-    <button class="btn" id="run-btn">Retreat to Next Room</button>
-    <button class="btn" id="ability-btn">Use Skill</button>
-  </div>
-
-  <!-- Cloud Save Modal -->
-  <div class="modal-overlay" id="cloud-modal">
-    <div class="modal-content cloud-modal-content">
-      <div class="modal-header" style="color: var(--cloud-color)">Cloud Save Sync</div>
-      
-      <div class="cloud-box">
-        <div style="font-size: 13px; opacity: 0.8;">Upload Save to Cloud:</div>
-        <button class="btn btn-cloud" style="margin-top: 8px; width: 100%;" onclick="uploadCloudSave()">Save to Cloud & Get Code</button>
-        <div id="cloud-code-result" class="cloud-code-display">------</div>
+  <header class="w-full max-w-4xl bg-slate-900/80 border border-slate-800 rounded-xl p-4 mb-4 backdrop-blur shadow-2xl flex flex-wrap justify-between items-center gap-3">
+    <div class="flex items-center gap-3 cursor-pointer" id="game-title">
+      <div class="w-10 h-10 rounded-lg bg-red-950 border border-red-600 flex items-center justify-center text-red-500 text-xl font-bold shadow-lg shadow-red-950/50">
+        <i class="fa-solid font-cinzel">DS</i>
       </div>
-
-      <div class="cloud-box">
-        <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">Load Cloud Save:</div>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="cloud-code-input" placeholder="Enter 6-Digit Code" maxlength="6" style="text-transform: uppercase;">
-          <button class="btn btn-cloud" onclick="downloadCloudSave()">Load Save</button>
-        </div>
-      </div>
-
-      <div id="cloud-status-msg" style="font-size: 13px; color: #a0aec0; min-height: 18px; text-align: center;"></div>
-
-      <div style="margin-top: 16px; text-align: right;">
-        <button class="btn" style="background: #4a5568;" id="close-cloud-btn">Close</button>
+      <div>
+        <h1 class="font-cinzel text-xl md:text-2xl font-bold bg-gradient-to-r from-red-500 via-amber-400 to-amber-200 bg-clip-text text-transparent">Dungeon Scoundrel</h1>
+        <p class="text-xs text-slate-400">Tactical Deck-Crawler RPG</p>
       </div>
     </div>
-  </div>
-
-  <!-- Leaderboard Modal -->
-  <div class="modal-overlay" id="leaderboard-modal">
-    <div class="modal-content leaderboard-modal-content">
-      <div class="modal-header" style="color: #805ad5;">Global Highscores</div>
-      <div class="leaderboard-list" id="leaderboard-container">
-        <div style="text-align:center; padding: 12px; color: #a0aec0;">Loading leaderboard...</div>
-      </div>
-      <div style="margin-top: 16px; text-align: right;">
-        <button class="btn" style="background: #4a5568;" id="close-leaderboard-btn">Close</button>
-      </div>
+    
+    <div class="flex items-center gap-2">
+      <button id="btn-leaderboard" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+        <i class="fa-solid font-cinzel fa-trophy"></i>
+        <span>Leaderboard</span>
+      </button>
+      <button id="btn-cloud-sync" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-cloud"></i>
+        <span id="sync-btn-text">Sync Code</span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <!-- Shop Modal -->
-  <div class="modal-overlay" id="shop-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>Post-Boss Merchant</span>
-        <span id="shop-gold">Gold: 0</span>
-      </div>
-      <div class="shop-item">
-        <div><div>Health Potion</div><div style="font-size: 12px; opacity: 0.7;">Restores +8 HP</div></div>
-        <button class="btn" onclick="buyItem('potion', 12)">12 Gold</button>
-      </div>
-      <div class="shop-item">
-        <div><div>Whetstone</div><div style="font-size: 12px; opacity: 0.7;">+3 Weapon Durability</div></div>
-        <button class="btn" onclick="buyItem('whetstone', 10)">10 Gold</button>
-      </div>
-      <div class="shop-item">
-        <div><div>Iron Armor</div><div style="font-size: 12px; opacity: 0.7;">+2 Armor</div></div>
-        <button class="btn" onclick="buyItem('armor', 25)">25 Gold</button>
-      </div>
-      <div style="margin-top: 16px; text-align: right;">
-        <button class="btn" style="background: #e53e3e;" id="close-shop-btn">Continue Run</button>
-      </div>
+  <section id="class-select-container" class="w-full max-w-4xl bg-slate-900/60 border border-slate-800 rounded-xl p-4 mb-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3 w-full md:w-auto">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">Hero Class:</span>
+      <select id="hero-class" class="bg-slate-950 border border-slate-700 text-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 w-full md:w-48 font-medium">
+        <option value="Knight">Knight (+5 Max HP, Block)</option>
+        <option value="Rogue">Rogue (+10 Gold, Sprint)</option>
+        <option value="Sorcerer">Sorcerer (Dispel Curses)</option>
+        <option value="Necromancer">Necromancer (Siphon Life)</option>
+        <option value="Paladin">Paladin (+2 Armor, Holy Heal)</option>
+        <option value="Berserker">Berserker (Rage Attack)</option>
+      </select>
     </div>
-  </div>
+    
+    <div class="text-xs text-slate-400 flex-1 px-2" id="class-desc">
+      <!-- Populated via JS -->
+    </div>
+
+    <button id="start-btn" class="w-full md:w-auto bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-red-950/40 border border-red-500/30 transition-all flex items-center justify-center gap-2">
+      <i class="fa-solid fa-play"></i>
+      <span>New Run</span>
+    </button>
+  </section>
+
+  <section class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-xl p-3 md:p-4 mb-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 shadow-xl">
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-red-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-heart"></i> Health
+      </div>
+      <div class="text-base font-bold text-slate-100 mt-1" id="hp-val">20 / 20</div>
+    </div>
+    
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Level / XP
+      </div>
+      <div class="text-base font-bold text-slate-100 mt-1" id="xp-val">Lvl 1 (0/10)</div>
+    </div>
+
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-coins"></i> Gold
+      </div>
+      <div class="text-base font-bold text-amber-300 mt-1" id="gold-val">0</div>
+    </div>
+
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-blue-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-shield-halved"></i> Gear
+      </div>
+      <div class="text-xs font-bold text-slate-200 mt-1 truncate max-w-full" id="weapon-val">Bare Hands</div>
+    </div>
+
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-dungeon"></i> Dungeon
+      </div>
+      <div class="text-base font-bold text-slate-100 mt-1" id="floor-val">Wave 1</div>
+    </div>
+
+    <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center">
+      <div class="text-[10px] uppercase font-bold text-cyan-400 tracking-wider flex items-center gap-1">
+        <i class="fa-solid fa-bolt"></i> Skill [S]
+      </div>
+      <div class="text-xs font-bold text-cyan-300 mt-1" id="skill-val">Ready</div>
+    </div>
+  </section>
+
+  <main class="w-full max-w-4xl flex-1 flex flex-col justify-center my-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full" id="dungeon-room">
+      <!-- 4 Encounter cards rendered dynamically -->
+    </div>
+  </main>
+
+  <footer class="w-full max-w-4xl bg-slate-900/80 border border-slate-800 rounded-xl p-3 mt-4 flex flex-wrap gap-3 items-center justify-between">
+    <div class="text-xs text-slate-400 flex items-center gap-2">
+      <span class="bg-slate-800 px-2 py-1 rounded text-slate-300 font-mono">[1-4]</span> Pick Card
+      <span class="bg-slate-800 px-2 py-1 rounded text-slate-300 font-mono">[R]</span> Retreat
+      <span class="bg-slate-800 px-2 py-1 rounded text-slate-300 font-mono">[S]</span> Class Skill
+    </div>
+    
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+      <button id="run-btn" class="flex-1 sm:flex-initial bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-person-running"></i>
+        <span>Retreat [R]</span>
+      </button>
+      <button id="ability-btn" class="flex-1 sm:flex-initial bg-cyan-900/60 hover:bg-cyan-800/80 border border-cyan-500/40 text-cyan-200 px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/50">
+        <i class="fa-solid fa-sparkles"></i>
+        <span id="ability-btn-label">Use Skill [S]</span>
+      </button>
+    </div>
+  </footer>
+
 
   <!-- Level Up Modal -->
-  <div class="modal-overlay" id="levelup-modal">
-    <div class="modal-content" style="border-color: #38a169;">
-      <div class="modal-header" style="color: #38a169;">LEVEL UP! Choose Reward</div>
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
-        <button class="btn" style="padding: 12px; background: #2f855a;" onclick="chooseLevelReward('hp')">+5 Max Health & Full Heal</button>
-        <button class="btn" style="padding: 12px; background: #2b6cb0;" onclick="chooseLevelReward('armor')">+2 Permanent Armor</button>
-        <button class="btn" style="padding: 12px; background: #d69e2e;" onclick="chooseLevelReward('gold')">+30 Bonus Gold</button>
+  <div id="levelup-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-purple-500/40 rounded-xl p-6 max-w-md w-full shadow-2xl text-center">
+      <div class="w-12 h-12 rounded-full bg-purple-950 border border-purple-500 flex items-center justify-center text-purple-400 text-2xl mx-auto mb-3">
+        <i class="fa-solid fa-circle-up"></i>
+      </div>
+      <h3 class="font-cinzel text-xl font-bold text-purple-300 mb-1">Level Up Achieved!</h3>
+      <p class="text-xs text-slate-400 mb-4">Choose a stat boost for your Hero</p>
+      
+      <div class="space-y-3" id="levelup-options">
+        <!-- Upgrades injected via JS -->
       </div>
     </div>
   </div>
 
-  <!-- Secret Cheat Modal -->
-  <div class="modal-overlay" id="cheat-modal">
-    <div class="modal-content cheat-modal-content">
-      <div class="modal-header cheat-header">
-        <span>Secret Cheat Menu</span>
-        <span id="godmode-indicator" style="font-size: 12px; color: #38a169;"></span>
+  <!-- Merchant Shop Modal -->
+  <div id="shop-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-6 max-w-lg w-full shadow-2xl">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-store text-amber-400 text-xl"></i>
+          <h3 class="font-cinzel text-lg font-bold text-amber-300">Dungeon Merchant</h3>
+        </div>
+        <div class="text-sm font-bold text-amber-400 flex items-center gap-1">
+          <i class="fa-solid fa-coins"></i> <span id="shop-gold">0</span>
+        </div>
       </div>
-      <div class="shop-item"><div>Treasury Boost (+50 Gold)</div><button class="btn" onclick="cheatAddGold()">Add</button></div>
-      <div class="shop-item"><div>Divine Healer (Full Heal)</div><button class="btn" onclick="cheatFullHeal()">Heal</button></div>
-      <div class="shop-item"><div>God Blade (Excalibur)</div><button class="btn" onclick="cheatSpawnWeapon()">Spawn</button></div>
-      <div class="shop-item"><div>God Mode</div><button class="btn" onclick="cheatToggleGodMode()">Toggle</button></div>
-      <div class="shop-item"><div>Skip Wave</div><button class="btn" onclick="cheatSkipFloor()">Skip</button></div>
-      <div style="margin-top: 16px; text-align: right;">
-        <button class="btn" style="background: #4a5568;" id="close-cheat-btn">Close</button>
+      
+      <div id="shop-items" class="space-y-3 mb-5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+        <!-- Shop items loaded via JS -->
+      </div>
+
+      <button id="close-shop-btn" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-2.5 rounded-lg text-sm font-semibold transition-all">
+        Continue Crawl
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaderboard & Sync Modal -->
+  <div id="sync-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-cyan-500/40 rounded-xl p-6 max-w-md w-full shadow-2xl">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+        <h3 class="font-cinzel text-lg font-bold text-cyan-300" id="sync-modal-title">Cloud Save & Sync</h3>
+        <button id="close-sync-btn" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="sync-tab-content">
+        <!-- Sync form / details injected here -->
       </div>
     </div>
   </div>
 
-  <script>
-    // --- Firebase Config ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDemoKeyForPublicLeaderboardSync01",
-      authDomain: "dungeon-scoundrel-demo.firebaseapp.com",
-      projectId: "dungeon-scoundrel-demo",
-      storageBucket: "dungeon-scoundrel-demo.appspot.com",
-      messagingSenderId: "100000000000",
-      appId: "1:100000000000:web:abcdef123456"
+  <!-- Secret Cheat Menu -->
+  <div id="cheat-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-red-500/50 rounded-xl p-6 max-w-sm w-full shadow-2xl text-center">
+      <div class="text-red-500 text-3xl mb-2"><i class="fa-solid fa-terminal"></i></div>
+      <h3 class="font-cinzel text-lg font-bold text-red-400 mb-2">Developer Vault</h3>
+      <p class="text-xs text-slate-400 mb-4">Secret Debug Protocol Enabled</p>
+
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <button id="cheat-hp" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-400 py-2 text-xs font-semibold rounded">+50 Max HP</button>
+        <button id="cheat-gold" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 py-2 text-xs font-semibold rounded">+500 Gold</button>
+        <button id="cheat-weapon" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-400 py-2 text-xs font-semibold rounded">Excalibur</button>
+        <button id="cheat-skip" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-400 py-2 text-xs font-semibold rounded">+5 Waves</button>
+      </div>
+
+      <button id="close-cheat-btn" class="w-full bg-red-950/60 hover:bg-red-900/80 border border-red-600/40 text-red-200 py-2 rounded text-xs font-bold">
+        Close Debug Menu
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global setup parameters
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'dungeon-scoundrel';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "demo-key",
+      authDomain: "demo.firebaseapp.com",
+      projectId: "demo-project",
+      storageBucket: "demo.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:123456"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    // --- Core State Variables ---
-    let health = 20, maxHealth = 20, level = 1, xp = 0, xpToNext = 10;
-    let gold = 0, armor = 0, currentFloor = 1, isEndless = false;
-    let equippedWeapon = null, roomEncounters = [], heroClass = "Knight";
-    let skillUsed = false, retreatCount = 0, maxRetreats = 1, godMode = false;
+    let db, auth, user = null;
+    let syncCode = localStorage.getItem('ds_sync_code') || '';
 
-    // Doubled Content Rosters
+    // Initialize Firebase silently
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+      user = auth.currentUser;
+      if (user) {
+        document.getElementById('sync-btn-text').innerText = syncCode ? `Sync: ${syncCode}` : "Cloud Sync";
+      }
+    } catch (e) {
+      console.warn("Firebase running in offline-local mode.");
+    }
+
+    let health = 20, maxHealth = 20;
+    let level = 1, xp = 0, xpToNext = 10;
+    let gold = 0, armor = 0;
+    let currentFloor = 1;
+    let equippedWeapon = null;
+    let roomEncounters = [];
+    let heroClass = "Knight";
+    let skillUsed = false;
+    let retreatCount = 0;
+    let maxRetreats = 1;
+    let isEndless = false;
+    let titleClickCount = 0;
+
+    const classStats = {
+      Knight: { maxHpBonus: 5, goldBonus: 0, armorBonus: 0, desc: "Swarms with high resilience and shield mastery. Passive: +5 Max HP." },
+      Rogue: { maxHpBonus: 0, goldBonus: 10, armorBonus: 0, desc: "Swift opportunist. Passive: Starts with +10 Gold & extra room retreat." },
+      Sorcerer: { maxHpBonus: 0, goldBonus: 0, armorBonus: 0, desc: "Master of magic. Passive: Active Skill dispels all Cursed/Mimic tiles in room." },
+      Necromancer: { maxHpBonus: -2, goldBonus: 5, armorBonus: 0, desc: "Dark occultist. Passive: Siphons +2 HP whenever defeating a non-Boss enemy." },
+      Paladin: { maxHpBonus: 2, goldBonus: 0, armorBonus: 2, desc: "Holy defender. Passive: Starts with +2 Permanent Armor." },
+      Berserker: { maxHpBonus: 8, goldBonus: 0, armorBonus: -1, desc: "High Risk, High Reward. Passive: +8 Max HP but suffers -1 Armor." }
+    };
+
     const enemyTypes = [
-      { name: "Goblin", baseDmg: 3, xp: 4, dropChance: 0.6, gold: 5 },
-      { name: "Giant Spider", baseDmg: 4, xp: 5, dropChance: 0.65, gold: 7 },
-      { name: "Skeleton Fighter", baseDmg: 5, xp: 6, dropChance: 0.7, gold: 9 },
-      { name: "Necromancer Cultist", baseDmg: 7, xp: 8, dropChance: 0.75, gold: 12 },
-      { name: "Orc Warrior", baseDmg: 8, xp: 10, dropChance: 0.8, gold: 15 },
-      { name: "Shadow Assassin", baseDmg: 10, xp: 12, dropChance: 0.85, gold: 18 },
-      { name: "Dungeon Guard", baseDmg: 11, xp: 14, dropChance: 0.88, gold: 20 },
-      { name: "Demon Knight", baseDmg: 13, xp: 17, dropChance: 0.90, gold: 24 },
-      { name: "Minotaur", baseDmg: 14, xp: 20, dropChance: 0.93, gold: 28 },
-      { name: "Dungeon Lich", baseDmg: 16, xp: 25, dropChance: 0.96, gold: 35 }
+      { name: "Goblin Raider", baseDmg: 3, xp: 4, gold: 5, icon: "fa-skull-crossbones", color: "text-red-400" },
+      { name: "Skeleton Fighter", baseDmg: 5, xp: 6, gold: 9, icon: "fa-bone", color: "text-slate-300" },
+      { name: "Orc Conqueror", baseDmg: 8, xp: 10, gold: 15, icon: "fa-hand-fist", color: "text-amber-500" },
+      { name: "Demon Sentinel", baseDmg: 12, xp: 16, gold: 22, icon: "fa-spaghetti-monster-flying", color: "text-purple-400" }
     ];
 
     const weaponTypes = [
-      { name: "Iron Dagger", power: 3, durability: 3 },
-      { name: "Shadow Dagger", power: 4, durability: 4 },
-      { name: "Broadsword", power: 6, durability: 4 },
-      { name: "Flanged Mace", power: 7, durability: 3 },
-      { name: "Battle Axe", power: 9, durability: 3 },
-      { name: "Greatsword", power: 10, durability: 3 },
-      { name: "Warhammer", power: 12, durability: 2 },
-      { name: "Halberd", power: 14, durability: 2 }
+      { name: "Rusty Dagger", power: 3, durability: 3, icon: "fa-scalpel" },
+      { name: "Iron Broadsword", power: 5, durability: 4, icon: "fa-khanda" },
+      { name: "Heavy Battleaxe", power: 8, durability: 3, icon: "fa-axe" },
+      { name: "Rune Blade", power: 12, durability: 5, icon: "fa-wand-magic" }
     ];
 
     function initGame() {
-      heroClass = document.getElementById("hero-class").value;
-      maxHealth = heroClass === "Knight" ? 25 : (heroClass === "Paladin" ? 22 : 20);
-      health = maxHealth; level = 1; xp = 0; xpToNext = 10;
-      gold = heroClass === "Rogue" ? 10 : 0;
-      armor = heroClass === "Paladin" ? 2 : 0;
-      currentFloor = 1; isEndless = false;
-      equippedWeapon = null; skillUsed = false;
-      retreatCount = 0; maxRetreats = heroClass === "Rogue" ? 2 : 1;
-      godMode = false;
+      const selectEl = document.getElementById("hero-class");
+      heroClass = selectEl.value;
 
-      generateRoom(); updateUI(); saveState();
+      const cData = classStats[heroClass];
+      maxHealth = 20 + cData.maxHpBonus;
+      health = maxHealth;
+      level = 1;
+      xp = 0;
+      xpToNext = 10;
+      gold = cData.goldBonus;
+      armor = Math.max(0, cData.armorBonus);
+      currentFloor = 1;
+      equippedWeapon = null;
+      skillUsed = false;
+      retreatCount = 0;
+      maxRetreats = heroClass === "Rogue" ? 2 : 1;
+      isEndless = false;
+
+      generateRoom();
+      updateUI();
     }
 
     function generateRoom() {
       roomEncounters = [];
+      skillUsed = false;
+
+      // Boss Wave condition (Every 5 floors)
       if (currentFloor % 5 === 0) {
+        const bossDmg = 12 + Math.floor(currentFloor * 1.8);
         roomEncounters.push({
           type: "Boss",
           title: `Wave ${currentFloor} Boss`,
-          value: 12 + Math.floor(currentFloor * 2.5),
-          xpReward: 25 + currentFloor * 5,
-          goldReward: currentFloor * 15,
-          nodeClass: "node-boss"
+          value: bossDmg,
+          xpReward: 25 + currentFloor * 2,
+          goldReward: 35 + currentFloor * 3,
+          icon: "fa-dragon",
+          border: "card-glow-boss border-red-600 bg-red-950/30",
+          desc: `Boss Threat! Base Dmg: ${bossDmg}`
         });
         return;
       }
 
+      // Generate 4 dynamic room encounters
       for (let i = 0; i < 4; i++) {
-        roomEncounters.push(createRandomEncounter());
-      }
-    }
-
-    function createRandomEncounter() {
-      const rand = Math.random();
-      if (rand < 0.35) {
-        const enemyIdx = Math.min(Math.floor(Math.random() * (1 + currentFloor / 2)), enemyTypes.length - 1);
-        const t = enemyTypes[enemyIdx];
-        return {
-          type: "Enemy", title: t.name, value: t.baseDmg + Math.floor(currentFloor / 3),
-          xpReward: t.xp, dropChance: t.dropChance, goldReward: t.gold, nodeClass: "node-enemy"
-        };
-      } else if (rand < 0.50) {
-        const wIdx = Math.min(Math.floor(Math.random() * (1 + currentFloor / 3)), weaponTypes.length - 1);
-        const w = weaponTypes[wIdx];
-        return { type: "Weapon", title: w.name, power: w.power, durability: w.durability, nodeClass: "node-weapon" };
-      } else if (rand < 0.62) {
-        return { type: "Shrine", title: "Healing Shrine", value: 4 + Math.floor(Math.random() * 5), nodeClass: "node-shrine" };
-      } else if (rand < 0.72) {
-        return { type: "Fountain", title: "Fountain of Youth", value: maxHealth, nodeClass: "node-shrine" };
-      } else if (rand < 0.80) {
-        return { type: "Treasure", title: "Treasure Chest", goldReward: 15 + Math.floor(Math.random() * 15), nodeClass: "node-treasure" };
-      } else if (rand < 0.86) {
-        return { type: "Armory", title: "Armory Vault", armorBoost: 2, nodeClass: "node-weapon" };
-      } else if (rand < 0.93) {
-        return { type: "Curse", title: "Cursed Fountain", value: 3 + Math.floor(Math.random() * 4), goldReward: 10, nodeClass: "node-curse" };
-      } else {
-        return { type: "Mimic", title: "Mimic Trap!", value: 6, goldReward: 20, nodeClass: "node-curse" };
+        const rand = Math.random();
+        if (rand < 0.38) {
+          // Enemy Encounter
+          const enemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+          const scalingDmg = enemy.baseDmg + Math.floor(currentFloor * 0.5);
+          roomEncounters.push({
+            type: "Enemy",
+            title: enemy.name,
+            value: scalingDmg,
+            xpReward: enemy.xp,
+            goldReward: enemy.gold,
+            icon: enemy.icon,
+            border: "card-glow-enemy border-red-900/60 bg-red-950/20",
+            desc: `Deals ${scalingDmg} ATK damage.`
+          });
+        } else if (rand < 0.58) {
+          // Weapon Encounter
+          const wpn = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
+          roomEncounters.push({
+            type: "Weapon",
+            title: wpn.name,
+            power: wpn.power,
+            durability: wpn.durability,
+            icon: wpn.icon,
+            border: "card-glow-weapon border-amber-900/60 bg-amber-950/20",
+            desc: `ATK: ${wpn.power} | Uses: ${wpn.durability}`
+          });
+        } else if (rand < 0.73) {
+          // Healing Shrine / Fountain
+          const healVal = 4 + Math.floor(Math.random() * 5);
+          roomEncounters.push({
+            type: "Shrine",
+            title: "Healing Fountain",
+            value: healVal,
+            icon: "fa-hands-holding-water",
+            border: "card-glow-shrine border-emerald-900/60 bg-emerald-950/20",
+            desc: `Restores +${healVal} Health.`
+          });
+        } else if (rand < 0.85) {
+          // Cursed Fountain / Trap
+          const dmgVal = 3 + Math.floor(Math.random() * 4);
+          const gVal = 10 + Math.floor(Math.random() * 10);
+          roomEncounters.push({
+            type: "Curse",
+            title: "Cursed Fountain",
+            value: dmgVal,
+            goldReward: gVal,
+            icon: "fa-skull",
+            border: "card-glow-curse border-purple-900/60 bg-purple-950/20",
+            desc: `Take ${dmgVal} DMG for +${gVal} Gold.`
+          });
+        } else {
+          // Treasure Chest / Mimic
+          const isMimic = Math.random() < 0.35;
+          if (isMimic) {
+            roomEncounters.push({
+              type: "Mimic",
+              title: "Chest Mimic",
+              value: 7 + currentFloor,
+              xpReward: 8,
+              goldReward: 20,
+              icon: "fa-box-open",
+              border: "card-glow-enemy border-red-900/80 bg-red-950/30",
+              desc: "Trap! Ambushes on open!"
+            });
+          } else {
+            const chestGold = 15 + Math.floor(Math.random() * 15);
+            roomEncounters.push({
+              type: "Chest",
+              title: "Treasure Chest",
+              goldReward: chestGold,
+              icon: "fa-toolbox",
+              border: "card-glow-chest border-blue-900/60 bg-blue-950/20",
+              desc: `Contains +${chestGold} Gold.`
+            });
+          }
+        }
       }
     }
 
     function interact(index) {
+      if (!roomEncounters[index]) return;
       const enc = roomEncounters[index];
 
       if (enc.type === "Shrine") {
         health = Math.min(maxHealth, health + enc.value);
-      } else if (enc.type === "Fountain") {
-        health = maxHealth;
-      } else if (enc.type === "Treasure") {
+      } else if (enc.type === "Curse") {
+        let netDmg = Math.max(0, enc.value - armor);
+        health -= netDmg;
         gold += enc.goldReward;
-      } else if (enc.type === "Armory") {
-        armor += enc.armorBoost;
-      } else if (enc.type === "Curse" || enc.type === "Mimic") {
-        if (!godMode) {
-          let taken = Math.max(0, enc.value - armor);
-          health -= taken;
-          if (taken > 0) triggerHitAnimation();
-        }
+      } else if (enc.type === "Chest") {
         gold += enc.goldReward;
       } else if (enc.type === "Weapon") {
         equippedWeapon = { name: enc.title, power: enc.power, durability: enc.durability };
-      } else if (enc.type === "Enemy" || enc.type === "Boss") {
-        handleCombat(enc);
-      }
-
-      roomEncounters.splice(index, 1);
-
-      if (roomEncounters.length === 0 || enc.type === "Boss") {
-        if (enc.type === "Boss") {
-          openShop();
-          return;
-        }
-        advanceFloor();
-      }
-
-      updateUI(); saveState(); checkDeath();
-    }
-
-    function handleCombat(enc) {
-      if (!godMode) {
+      } else if (enc.type === "Enemy" || enc.type === "Boss" || enc.type === "Mimic") {
         let rawDmg = Math.max(0, enc.value - armor);
+        
         if (equippedWeapon && equippedWeapon.durability > 0) {
-          let actualDmg = Math.max(0, rawDmg - equippedWeapon.power);
-          health -= actualDmg;
-          equippedWeapon.durability -= 1;
-          if (equippedWeapon.durability <= 0) equippedWeapon = null;
-          if (actualDmg > 0) triggerHitAnimation();
+          let blockedDmg = Math.min(rawDmg, equippedWeapon.power);
+          let finalDmg = rawDmg - blockedDmg;
+          health -= finalDmg;
+          equippedWeapon.durability--;
+          if (equippedWeapon.durability <= 0) {
+            equippedWeapon = null;
+          }
         } else {
           health -= rawDmg;
-          triggerHitAnimation();
         }
+
+        xp += enc.xpReward;
+        gold += enc.goldReward;
+
+        // Necromancer Passive Siphon
+        if (heroClass === "Necromancer" && enc.type !== "Boss") {
+          health = Math.min(maxHealth, health + 2);
+        }
+
+        checkLevelUp();
       }
 
-      addXP(enc.xpReward || 5);
+      // Remove visited node card
+      roomEncounters.splice(index, 1);
 
-      if (enc.type === "Boss") {
-        gold += enc.goldReward;
-      } else if (Math.random() < enc.dropChance) {
-        gold += enc.goldReward;
+      // Room cleared or boss defeated logic
+      if (roomEncounters.length === 0 || enc.type === "Boss") {
+        if (enc.type === "Boss") {
+          openShopModal();
+        }
+        currentFloor++;
+        
+        // Wave 20 Game Victory Check
+        if (currentFloor === 21 && !isEndless) {
+          if (confirm("VICTORY! You conquered Wave 20 of Dungeon Scoundrel!\n\nDo you wish to continue into Endless Nightmare Mode?")) {
+            isEndless = true;
+          } else {
+            saveScoreToLeaderboard();
+            initGame();
+            return;
+          }
+        }
+
+        generateRoom();
+      }
+
+      updateUI();
+
+      if (health <= 0) {
+        alert(`You perished on Wave ${currentFloor}! Final Score logged to local history.`);
+        saveScoreToLeaderboard();
+        initGame();
       }
     }
 
-    function addXP(amount) {
-      xp += amount;
+    function checkLevelUp() {
       if (xp >= xpToNext) {
         xp -= xpToNext;
         level++;
         xpToNext = Math.floor(xpToNext * 1.5);
-        document.getElementById("levelup-modal").style.display = "flex";
+        openLevelUpModal();
       }
     }
 
-    function chooseLevelReward(type) {
-      if (type === 'hp') { maxHealth += 5; health = maxHealth; }
-      else if (type === 'armor') { armor += 2; }
-      else if (type === 'gold') { gold += 30; }
-      document.getElementById("levelup-modal").style.display = "none";
-      updateUI(); saveState();
-    }
-
-    function advanceFloor() {
-      if (currentFloor === 20 && !isEndless) {
-        let cont = confirm("VICTORY! You beat Wave 20! Do you want to continue into Endless Mode?");
-        if (cont) {
-          isEndless = true;
-          currentFloor++;
-          generateRoom();
-        } else {
-          submitScore();
-          initGame();
-        }
-      } else {
-        currentFloor++;
-        generateRoom();
-      }
-    }
-
-    // --- Firebase Cloud Sync ---
-    async function uploadCloudSave() {
-      const status = document.getElementById("cloud-status-msg");
-      status.innerText = "Syncing with cloud...";
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      const payload = {
-        health, maxHealth, level, xp, xpToNext, gold, armor, currentFloor, isEndless, equippedWeapon, roomEncounters, heroClass, skillUsed, retreatCount, godMode
-      };
-
-      try {
-        await db.collection("cloud_saves").doc(code).set(payload);
-        document.getElementById("cloud-code-result").innerText = code;
-        status.innerText = "Cloud save successfully stored!";
-      } catch (e) {
-        status.innerText = "Error uploading save. Try again.";
-      }
-    }
-
-    async function downloadCloudSave() {
-      const code = document.getElementById("cloud-code-input").value.trim().toUpperCase();
-      const status = document.getElementById("cloud-status-msg");
-      if (!code) return;
-
-      status.innerText = "Loading save...";
-      try {
-        const doc = await db.collection("cloud_saves").doc(code).get();
-        if (doc.exists) {
-          const s = doc.data();
-          health = s.health; maxHealth = s.maxHealth; level = s.level; xp = s.xp;
-          xpToNext = s.xpToNext; gold = s.gold; armor = s.armor; currentFloor = s.currentFloor;
-          isEndless = s.isEndless; equippedWeapon = s.equippedWeapon; roomEncounters = s.roomEncounters;
-          heroClass = s.heroClass; skillUsed = s.skillUsed; retreatCount = s.retreatCount; godMode = s.godMode;
-          
-          document.getElementById("hero-class").value = heroClass;
-          updateUI(); saveState();
-          status.innerText = "Cloud save loaded!";
-        } else {
-          status.innerText = "Invalid Cloud Code!";
-        }
-      } catch (e) {
-        status.innerText = "Error retrieving cloud save.";
-      }
-    }
-
-    // --- Leaderboard Sync ---
-    async function submitScore() {
-      const name = prompt("Enter your hero name for the Leaderboard:", "Scoundrel");
-      if (!name) return;
-      try {
-        await db.collection("highscores").add({
-          name: name.slice(0, 15),
-          wave: currentFloor,
-          level: level,
-          gold: gold,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        openLeaderboard();
-      } catch(e) {}
-    }
-
-    async function openLeaderboard() {
-      const container = document.getElementById("leaderboard-container");
-      document.getElementById("leaderboard-modal").style.display = "flex";
-      container.innerHTML = `<div style="text-align:center; padding: 12px; color: #a0aec0;">Fetching top scores...</div>`;
-
-      try {
-        const snap = await db.collection("highscores").orderBy("wave", "desc").limit(10).get();
-        container.innerHTML = "";
-        snap.forEach((doc, i) => {
-          const d = doc.data();
-          container.innerHTML += `
-            <div class="leaderboard-row">
-              <span>#${i+1} <b>${d.name}</b></span>
-              <span>Wave ${d.wave} (Lvl ${d.level})</span>
-            </div>
-          `;
-        });
-      } catch (e) {
-        container.innerHTML = `<div style="text-align:center; color: #e53e3e;">Failed to load leaderboard.</div>`;
-      }
-    }
-
-    // --- Class Skill Abilities ---
-    function useSkill() {
+    function useClassSkill() {
       if (skillUsed) return;
 
-      if (heroClass === "Sorcerer") {
-        roomEncounters = roomEncounters.filter(e => e.type !== "Curse");
-        while (roomEncounters.length < 4) roomEncounters.push(createRandomEncounter());
+      if (heroClass === "Knight") {
+        armor += 3;
         skillUsed = true;
-      } else if (heroClass === "Knight") {
-        health = Math.min(maxHealth, health + 6);
+      } else if (heroClass === "Rogue") {
+        // Reroll room
+        generateRoom();
+        skillUsed = true;
+      } else if (heroClass === "Sorcerer") {
+        // Dispel curses/mimics
+        roomEncounters = roomEncounters.map(c => {
+          if (c.type === "Curse" || c.type === "Mimic") {
+            return {
+              type: "Shrine", title: "Purified Fountain", value: 5,
+              icon: "fa-wand-magic-sparkles", border: "card-glow-shrine border-emerald-900/60 bg-emerald-950/20",
+              desc: "Restores +5 Health."
+            };
+          }
+          return c;
+        });
         skillUsed = true;
       } else if (heroClass === "Necromancer") {
-        health = Math.min(maxHealth, health + 5);
-        gold += 5;
+        health = Math.min(maxHealth, health + 6);
         skillUsed = true;
       } else if (heroClass === "Paladin") {
-        armor += 3;
-        health = Math.min(maxHealth, health + 3);
+        health = Math.min(maxHealth, health + 8);
         skillUsed = true;
       } else if (heroClass === "Berserker") {
-        if (roomEncounters.length > 1) {
-          roomEncounters.pop();
-          skillUsed = true;
+        health = Math.max(1, health - 3);
+        if (equippedWeapon) {
+          equippedWeapon.power += 4;
+        } else {
+          equippedWeapon = { name: "Rage Fists", power: 5, durability: 3 };
         }
+        skillUsed = true;
       }
 
-      updateUI(); saveState();
+      updateUI();
     }
 
-    function retreat() {
-      if (retreatCount >= maxRetreats || roomEncounters.length < 4) return;
+    function retreatRoom() {
+      if (retreatCount >= maxRetreats) {
+        alert("No remaining room retreats available!");
+        return;
+      }
       retreatCount++;
       generateRoom();
-      updateUI(); saveState();
-    }
-
-    function openShop() {
-      document.getElementById("shop-gold").innerText = `Gold: ${gold}`;
-      document.getElementById("shop-modal").style.display = "flex";
-    }
-
-    function closeShop() {
-      document.getElementById("shop-modal").style.display = "none";
-      advanceFloor();
-      updateUI(); saveState();
-    }
-
-    function buyItem(type, cost) {
-      if (gold < cost) return alert("Not enough gold!");
-      if (type === 'potion') { health = Math.min(maxHealth, health + 8); gold -= cost; }
-      else if (type === 'whetstone' && equippedWeapon) { equippedWeapon.durability += 3; gold -= cost; }
-      else if (type === 'armor') { armor += 2; gold -= cost; }
-      document.getElementById("shop-gold").innerText = `Gold: ${gold}`;
-      updateUI(); saveState();
-    }
-
-    // --- Secret Cheat Code ---
-    let titleClickCount = 0;
-    document.getElementById("game-title").addEventListener("click", () => {
-      titleClickCount++;
-      if (titleClickCount >= 5) {
-        titleClickCount = 0;
-        const code = prompt("Enter Secret Code:");
-        if (code === "1337" || code === "cheat") document.getElementById("cheat-modal").style.display = "flex";
-      }
-    });
-
-    function cheatAddGold() { gold += 50; updateUI(); saveState(); }
-    function cheatFullHeal() { health = maxHealth; updateUI(); saveState(); }
-    function cheatSpawnWeapon() { equippedWeapon = { name: "Excalibur", power: 20, durability: 10 }; updateUI(); saveState(); }
-    function cheatToggleGodMode() { godMode = !godMode; updateUI(); saveState(); }
-    function cheatSkipFloor() { currentFloor++; generateRoom(); updateUI(); saveState(); }
-
-    function triggerHitAnimation() {
-      document.body.classList.add("damage-anim");
-      setTimeout(() => document.body.classList.remove("damage-anim"), 250);
-    }
-
-    function checkDeath() {
-      if (health <= 0) {
-        alert(`You fell on Wave ${currentFloor}.`);
-        submitScore();
-        initGame();
-      }
+      updateUI();
     }
 
     function updateUI() {
-      document.getElementById("hp-val").innerText = `${health} / ${maxHealth}` + (godMode ? " (GOD)" : "");
+      document.getElementById("hp-val").innerText = `${health} / ${maxHealth}`;
       document.getElementById("xp-val").innerText = `Lvl ${level} (${xp}/${xpToNext})`;
       document.getElementById("gold-val").innerText = gold;
-      document.getElementById("weapon-val").innerText = equippedWeapon ? `${armor} Arm / ${equippedWeapon.name}` : `${armor} Arm / Unarmed`;
-      document.getElementById("floor-val").innerText = `${currentFloor} / ${isEndless ? 'Endless' : '20'}`;
-      document.getElementById("skill-val").innerText = skillUsed ? "Used" : "Ready";
+      document.getElementById("weapon-val").innerText = equippedWeapon 
+        ? `${equippedWeapon.name} (${equippedWeapon.power} PWR / ${equippedWeapon.durability} Uses)` 
+        : `Bare Hands (0 PWR)`;
+      document.getElementById("floor-val").innerText = isEndless ? `Wave ${currentFloor} (Endless)` : `Wave ${currentFloor} / 20`;
+      document.getElementById("skill-val").innerText = skillUsed ? "Used" : "Ready [S]";
 
-      document.getElementById("run-btn").disabled = retreatCount >= maxRetreats || roomEncounters.length < 4;
-      document.getElementById("ability-btn").disabled = skillUsed || heroClass === "Rogue";
+      // Class description label
+      const descEl = document.getElementById("class-desc");
+      if (descEl) descEl.innerText = classStats[heroClass].desc;
 
+      // Disable/Enable skill button
+      const abilityBtn = document.getElementById("ability-btn");
+      if (abilityBtn) {
+        abilityBtn.disabled = skillUsed;
+        abilityBtn.style.opacity = skillUsed ? "0.4" : "1";
+      }
+
+      // Render encounter grid cards
       const grid = document.getElementById("dungeon-room");
       grid.innerHTML = "";
-      roomEncounters.forEach((enc, idx) => {
-        const el = document.createElement("div");
-        el.className = `encounter-node ${enc.nodeClass}`;
-        el.onclick = () => interact(idx);
-        let desc = "";
-        if (enc.type === "Enemy" || enc.type === "Boss") desc = `Dmg: ${enc.value} | XP: +${enc.xpReward}`;
-        else if (enc.type === "Weapon") desc = `Power: ${enc.power} (${enc.durability} Uses)`;
-        else if (enc.type === "Shrine") desc = `Restores +${enc.value} HP`;
-        else if (enc.type === "Fountain") desc = `Full Heal to ${maxHealth} HP`;
-        else if (enc.type === "Treasure") desc = `Gold: +${enc.goldReward}`;
-        else if (enc.type === "Armory") desc = `+${enc.armorBoost} Permanent Armor`;
-        else if (enc.type === "Curse" || enc.type === "Mimic") desc = `Trap! -${enc.value} HP | +${enc.goldReward} Gold`;
 
-        el.innerHTML = `<div class="node-title">${enc.title}</div><div class="node-desc">${desc}</div>`;
-        grid.appendChild(el);
+      if (roomEncounters.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 italic">Room Cleared. Advance to next wave...</div>`;
+        return;
+      }
+
+      roomEncounters.forEach((enc, idx) => {
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 flex flex-col justify-between min-h-[160px] relative ${enc.border}`;
+        card.onclick = () => interact(idx);
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-2xl text-slate-200"><i class="fa-solid ${enc.icon}"></i></span>
+            <span class="bg-slate-900/80 border border-slate-700 text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono font-bold">[${idx + 1}]</span>
+          </div>
+          <div class="my-2">
+            <h4 class="font-cinzel font-bold text-sm text-slate-100">${enc.title}</h4>
+            <p class="text-xs text-slate-300 mt-1">${enc.desc}</p>
+          </div>
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-t border-slate-800/80 pt-2 flex justify-between">
+            <span>${enc.type} Node</span>
+            <span class="text-amber-400">Click / Press ${idx + 1}</span>
+          </div>
+        `;
+        grid.appendChild(card);
       });
     }
 
-    function saveState() {
-      const s = { health, maxHealth, level, xp, xpToNext, gold, armor, currentFloor, isEndless, equippedWeapon, roomEncounters, heroClass, skillUsed, retreatCount, godMode };
-      localStorage.setItem("scoundrel_rpg_savestate", JSON.stringify(s));
+    function openLevelUpModal() {
+      const modal = document.getElementById("levelup-modal");
+      const container = document.getElementById("levelup-options");
+      container.innerHTML = "";
+
+      const options = [
+        { title: "+5 Max Health", action: () => { maxHealth += 5; health += 5; } },
+        { title: "+1 Permanent Armor", action: () => { armor += 1; } },
+        { title: "+20 Bonus Gold", action: () => { gold += 20; } }
+      ];
+
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-200 font-semibold py-2.5 px-4 rounded-lg text-sm transition-all";
+        btn.innerText = opt.title;
+        btn.onclick = () => {
+          opt.action();
+          modal.classList.add("hidden");
+          updateUI();
+        };
+        container.appendChild(btn);
+      });
+
+      modal.classList.remove("hidden");
     }
 
-    function loadState() {
-      const s = localStorage.getItem("scoundrel_rpg_savestate");
-      if (s) {
-        const parsed = JSON.parse(s);
-        Object.assign(window, parsed);
-        updateUI();
-      } else {
-        initGame();
+    function openShopModal() {
+      const modal = document.getElementById("shop-modal");
+      document.getElementById("shop-gold").innerText = gold;
+      const container = document.getElementById("shop-items");
+      container.innerHTML = "";
+
+      const shopStock = [
+        { name: "Health Potion", cost: 15, desc: "+10 Health", buy: () => { health = Math.min(maxHealth, health + 10); } },
+        { name: "Armor Plate", cost: 20, desc: "+1 Permanent Armor", buy: () => { armor += 1; } },
+        { name: "Refurbished Sword", cost: 25, desc: "ATK 7, Durability 4", buy: () => { equippedWeapon = { name: "Refurbished Sword", power: 7, durability: 4 }; } }
+      ];
+
+      shopStock.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-800";
+        row.innerHTML = `
+          <div>
+            <div class="font-bold text-sm text-slate-200">${item.name}</div>
+            <div class="text-xs text-slate-400">${item.desc}</div>
+          </div>
+          <button class="bg-amber-600/80 hover:bg-amber-500 text-white font-bold text-xs px-3 py-1.5 rounded transition-all flex items-center gap-1">
+            <i class="fa-solid fa-coins"></i> ${item.cost}
+          </button>
+        `;
+        row.querySelector("button").onclick = () => {
+          if (gold >= item.cost) {
+            gold -= item.cost;
+            item.buy();
+            document.getElementById("shop-gold").innerText = gold;
+            updateUI();
+          } else {
+            alert("Not enough gold!");
+          }
+        };
+        container.appendChild(row);
+      });
+
+      modal.classList.remove("hidden");
+    }
+
+    document.getElementById("close-shop-btn").onclick = () => {
+      document.getElementById("shop-modal").classList.add("hidden");
+    };
+
+    async function saveScoreToLeaderboard() {
+      if (!db || !user) return;
+      const scoreData = {
+        class: heroClass,
+        wave: currentFloor,
+        level: level,
+        gold: gold,
+        date: new Date().toLocaleDateString()
+      };
+
+      try {
+        const leaderRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', user.uid);
+        await setDoc(leaderRef, scoreData, { merge: true });
+
+        if (syncCode) {
+          const syncRef = doc(db, 'artifacts', appId, 'public', 'data', 'syncKeys', syncCode);
+          await setDoc(syncRef, { ...scoreData, lastUpdated: Date.now() }, { merge: true });
+        }
+      } catch (e) {
+        console.error("Leaderboard error:", e);
       }
     }
 
-    // Modal Listeners
-    document.getElementById("start-btn").onclick = initGame;
-    document.getElementById("run-btn").onclick = retreat;
-    document.getElementById("ability-btn").onclick = useSkill;
-    document.getElementById("open-cloud-btn").onclick = () => document.getElementById("cloud-modal").style.display = "flex";
-    document.getElementById("close-cloud-btn").onclick = () => document.getElementById("cloud-modal").style.display = "none";
-    document.getElementById("open-leaderboard-btn").onclick = openLeaderboard;
-    document.getElementById("close-leaderboard-btn").onclick = () => document.getElementById("leaderboard-modal").style.display = "none";
-    document.getElementById("close-shop-btn").onclick = closeShop;
-    document.getElementById("close-cheat-btn").onclick = () => document.getElementById("cheat-modal").style.display = "none";
+    async function openLeaderboardModal() {
+      const modal = document.getElementById("sync-modal");
+      document.getElementById("sync-modal-title").innerText = "Global Leaderboard";
+      const content = document.getElementById("sync-tab-content");
+      content.innerHTML = `<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-xl"></i> Fetching scores...</div>`;
+      modal.classList.remove("hidden");
 
-    loadState();
+      try {
+        if (!db) throw new Error("Offline");
+        const leaderCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+        const snap = await getDocs(leaderCol);
+        let entries = [];
+        snap.forEach(docSnap => entries.push(docSnap.data()));
+
+        entries.sort((a, b) => b.wave - a.wave || b.gold - a.gold);
+
+        if (entries.length === 0) {
+          content.innerHTML = `<div class="text-center py-6 text-slate-400">No leaderboard entries found yet.</div>`;
+          return;
+        }
+
+        let html = `<div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">`;
+        entries.slice(0, 10).forEach((entry, idx) => {
+          html += `
+            <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded border border-slate-800 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-amber-400 w-4">#${idx + 1}</span>
+                <span class="text-slate-200 font-semibold">${entry.class}</span>
+              </div>
+              <div class="text-slate-400">
+                Wave <span class="text-emerald-400 font-bold">${entry.wave}</span> | <span class="text-amber-300 font-bold">${entry.gold}g</span>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+        content.innerHTML = html;
+      } catch (e) {
+        content.innerHTML = `<div class="text-center py-6 text-slate-400">Unable to load leaderboard in offline mode.</div>`;
+      }
+    }
+
+    function openSyncModal() {
+      const modal = document.getElementById("sync-modal");
+      document.getElementById("sync-modal-title").innerText = "Cloud Sync Key";
+      const content = document.getElementById("sync-tab-content");
+
+      content.innerHTML = `
+        <div class="space-y-4">
+          <p class="text-xs text-slate-400">Enter a 6-digit Sync Key to back up or load your progress across devices.</p>
+          <input type="text" id="sync-input" max="6" maxlength="6" value="${syncCode}" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 text-center text-lg font-mono tracking-widest text-cyan-300 p-2.5 rounded-lg focus:outline-none focus:border-cyan-500">
+          <div class="flex gap-2">
+            <button id="save-sync-btn" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs">Save Key</button>
+            <button id="gen-sync-btn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 rounded text-xs">Generate Random</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("save-sync-btn").onclick = () => {
+        const val = document.getElementById("sync-input").value.trim();
+        if (val.length === 6) {
+          syncCode = val;
+          localStorage.setItem('ds_sync_code', syncCode);
+          document.getElementById('sync-btn-text').innerText = `Sync: ${syncCode}`;
+          modal.classList.add("hidden");
+          saveScoreToLeaderboard();
+        } else {
+          alert("Key must be exactly 6 characters/digits.");
+        }
+      };
+
+      document.getElementById("gen-sync-btn").onclick = () => {
+        const randKey = Math.floor(100000 + Math.random() * 900000).toString();
+        document.getElementById("sync-input").value = randKey;
+      };
+
+      modal.classList.remove("hidden");
+    }
+
+    document.getElementById("close-sync-btn").onclick = () => {
+      document.getElementById("sync-modal").classList.add("hidden");
+    };
+
+    document.getElementById("game-title").onclick = () => {
+      titleClickCount++;
+      if (titleClickCount >= 5) {
+        titleClickCount = 0;
+        document.getElementById("cheat-modal").classList.remove("hidden");
+      }
+    };
+
+    document.getElementById("cheat-hp").onclick = () => { maxHealth += 50; health += 50; updateUI(); };
+    document.getElementById("cheat-gold").onclick = () => { gold += 500; updateUI(); };
+    document.getElementById("cheat-weapon").onclick = () => { equippedWeapon = { name: "Excalibur", power: 25, durability: 10 }; updateUI(); };
+    document.getElementById("cheat-skip").onclick = () => { currentFloor += 5; generateRoom(); updateUI(); };
+    document.getElementById("close-cheat-btn").onclick = () => { document.getElementById("cheat-modal").classList.add("hidden"); };
+
+    window.addEventListener("keydown", (e) => {
+      if (["1", "2", "3", "4"].includes(e.key)) {
+        interact(parseInt(e.key) - 1);
+      } else if (e.key.toLowerCase() === "r") {
+        retreatRoom();
+      } else if (e.key.toLowerCase() === "s") {
+        useClassSkill();
+      }
+    });
+
+    document.getElementById("hero-class").onchange = initGame;
+    document.getElementById("start-btn").onclick = initGame;
+    document.getElementById("run-btn").onclick = retreatRoom;
+    document.getElementById("ability-btn").onclick = useClassSkill;
+    document.getElementById("btn-leaderboard").onclick = openLeaderboardModal;
+    document.getElementById("btn-cloud-sync").onclick = openSyncModal;
+
+    // Boot Initial Game Instance
+    initGame();
   </script>
 </body>
 </html>
